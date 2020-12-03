@@ -35,6 +35,8 @@ spec:
         env:
         - name: MONGO_HOST
           value: shopping-cart-mongodb
+        - name: LOG_LEVEL
+          value: {{ .Values.logLevel }}
         ports:
         - containerPort: 8008
           name: shopping-cart

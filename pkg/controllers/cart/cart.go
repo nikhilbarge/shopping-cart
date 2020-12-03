@@ -4,11 +4,12 @@ import (
 	"encoding/json"
 	"net/http"
 	"shopping-cart/types"
+	"shopping-cart/utils/applog"
 
 	"github.com/gorilla/mux"
 )
 
-// AddItem : handler function for POST /v1/employees call
+// AddItem : handler function for PATCH /v1/cart call
 func AddItem(w http.ResponseWriter, r *http.Request) {
 	accessToken := &types.AccessToken{}
 	if !accessToken.AuthorizeByToken(w, r) {
@@ -16,14 +17,15 @@ func AddItem(w http.ResponseWriter, r *http.Request) {
 	}
 	cartid := accessToken.GetUser().CartID
 	cart := &types.Cart{}
-    cart.ID = cartid
+	cart.ID = cartid
+	applog.Info("adding item to cart")
 	if cart.Validate(w, r) && cart.AddToCart(w) { 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		response := map[string]interface{}{"data": cart, "status": 1}
 		json.NewEncoder(w).Encode(response)
 	}
-
+	applog.Info("add to cart request completed")
 }
 // ViewCart Get All items in cart
 func ViewCart(w http.ResponseWriter, r *http.Request) {
@@ -31,9 +33,11 @@ func ViewCart(w http.ResponseWriter, r *http.Request) {
 	if !accessToken.AuthorizeByToken(w, r) {
 		return
 	} 
+	
 	cartid := accessToken.GetUser().CartID
 	cart := &types.Cart{}
-    cart.ID = cartid 
+	cart.ID = cartid 
+	applog.Info("get all items from cart")
 	if cart.ViewCart(w) { 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
