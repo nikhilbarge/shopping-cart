@@ -11,7 +11,7 @@ DOCKER_IMAGE=shopping-cart
 # For Development Build #################################################################
 # Docker.io username and tag
 DOCKER_USER=nikhilbarge
-DOCKER_IMAGE_TAG=latest 
+DOCKER_IMAGE_TAG=test
 # For Development Build #################################################################
 
  

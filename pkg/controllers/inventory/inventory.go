@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/url"
+	"shopping-cart/pkg/service"
 	"shopping-cart/types"
 	"shopping-cart/utils/applog"
 
@@ -12,12 +13,15 @@ import (
 
 // AddItemToInventory : handler function for POST /v1/inventory call
 func AddItemToInventory(w http.ResponseWriter, r *http.Request) {
+	// authenticating user
 	accessToken := &types.AccessToken{}
-	if !accessToken.AuthorizeByToken(w, r) {
+	accessToken.GetTokenFromRequest(r)
+	authService := &service.AuthService{}
+	if !authService.AuthorizeByToken(w, accessToken) {
 		return
-	} 
+	}
 	errs := url.Values{}
-	if accessToken.GetUser().UserName!= "admin" {
+	if authService.GetUser().UserName!= "admin" {
 		errs.Add("data", "User does not have access to update inventory") 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusForbidden)
@@ -26,7 +30,8 @@ func AddItemToInventory(w http.ResponseWriter, r *http.Request) {
 	}
 	item := &types.Item{}
 	applog.Info("adding item to item")
-	if item.AddToInventory(w, r) { 
+	inventoryService := service.InventoryService{}
+	if inventoryService.AddToInventory(w, r, item) { 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		response := map[string]interface{}{"data": item, "status": 1}
@@ -36,13 +41,17 @@ func AddItemToInventory(w http.ResponseWriter, r *http.Request) {
 }
 // ViewInventory Get All items in inventory
 func ViewInventory(w http.ResponseWriter, r *http.Request) {
+	// authenticating user
 	accessToken := &types.AccessToken{}
-	if !accessToken.AuthorizeByToken(w, r) {
+	accessToken.GetTokenFromRequest(r)
+	authService := &service.AuthService{}
+	if !authService.AuthorizeByToken(w, accessToken) {
 		return
-	} 
+	}
 	items := &types.ItemList{} 
 	applog.Info("get all items from item")
-	if items.ViewInvetory(w) { 
+	inventoryService := service.InventoryService{}
+	if inventoryService.ViewInvetory(w,items) { 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		response := map[string]interface{}{"data": items, "status": 1}
@@ -53,12 +62,15 @@ func ViewInventory(w http.ResponseWriter, r *http.Request) {
 
 // RemoveItem : delete item from item
 func RemoveItem(w http.ResponseWriter, r *http.Request) {
+	// authenticating user
 	accessToken := &types.AccessToken{}
-	if !accessToken.AuthorizeByToken(w, r) {
+	accessToken.GetTokenFromRequest(r)
+	authService := &service.AuthService{}
+	if !authService.AuthorizeByToken(w, accessToken) {
 		return
-	} 
+	}
 	errs := url.Values{}
-	if accessToken.GetUser().UserName!= "admin" {
+	if authService.GetUser().UserName!= "admin" {
 		errs.Add("data", "User does not have access to update inventory") 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusForbidden)
@@ -68,8 +80,8 @@ func RemoveItem(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	item := &types.Item{}
 
-
-	if item.RemoveItem(w, params["itemid"]) { 
+	inventoryService := service.InventoryService{}
+	if inventoryService.RemoveItem(w,item, params["itemid"]) { 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		response := map[string]interface{}{"data": item, "message": "Item Deleted Successfully", "status": 1}
