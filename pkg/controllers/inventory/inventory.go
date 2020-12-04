@@ -16,7 +16,8 @@ func AddItemToInventory(w http.ResponseWriter, r *http.Request) {
 	// authenticating user
 	accessToken := &types.AccessToken{}
 	accessToken.GetTokenFromRequest(r)
-	authService := &service.AuthService{}
+	as := service.AuthService{}
+	authService := as.NewAuthService() 
 	if !authService.AuthorizeByToken(w, accessToken) {
 		return
 	}
@@ -30,7 +31,8 @@ func AddItemToInventory(w http.ResponseWriter, r *http.Request) {
 	}
 	item := &types.Item{}
 	applog.Info("adding item to item")
-	inventoryService := service.InventoryService{}
+	is := service.InventoryService{} 
+	inventoryService := is.NewInventoryService() 
 	if inventoryService.AddToInventory(w, r, item) { 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
@@ -44,13 +46,15 @@ func ViewInventory(w http.ResponseWriter, r *http.Request) {
 	// authenticating user
 	accessToken := &types.AccessToken{}
 	accessToken.GetTokenFromRequest(r)
-	authService := &service.AuthService{}
+	as := service.AuthService{}
+	authService := as.NewAuthService() 
 	if !authService.AuthorizeByToken(w, accessToken) {
 		return
 	}
 	items := &types.ItemList{} 
 	applog.Info("get all items from item")
-	inventoryService := service.InventoryService{}
+	is := service.InventoryService{}
+	inventoryService := is.NewInventoryService()
 	if inventoryService.ViewInvetory(w,items) { 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
@@ -64,8 +68,9 @@ func ViewInventory(w http.ResponseWriter, r *http.Request) {
 func RemoveItem(w http.ResponseWriter, r *http.Request) {
 	// authenticating user
 	accessToken := &types.AccessToken{}
-	accessToken.GetTokenFromRequest(r)
-	authService := &service.AuthService{}
+	accessToken.GetTokenFromRequest(r) 
+	as := service.AuthService{}
+	authService := as.NewAuthService() 
 	if !authService.AuthorizeByToken(w, accessToken) {
 		return
 	}
@@ -80,7 +85,8 @@ func RemoveItem(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	item := &types.Item{}
 
-	inventoryService := service.InventoryService{}
+	is := service.InventoryService{}
+	inventoryService := is.NewInventoryService()
 	if inventoryService.RemoveItem(w,item, params["itemid"]) { 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)

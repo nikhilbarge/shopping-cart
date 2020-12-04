@@ -16,9 +16,12 @@ import (
 )
 
 type AuthService struct{
-	DbService database.DataService
+	dbsrv database.IDataService
+} 
+func (as *AuthService) NewAuthService() *AuthService {
+	dbservice := database.NewDBService()
+	return &AuthService{dbsrv: dbservice}
 }
-
 var user types.User
 //GetUser : return user object
 func (auth *AuthService) GetUser() types.User {
@@ -28,7 +31,7 @@ func (auth *AuthService) GetUser() types.User {
 
 //Remove : remove access token
 func (auth *AuthService) Remove(accessToken *types.AccessToken) bool {
-	err := auth.DbService.RemoveToken(accessToken)
+	err := auth.dbsrv.RemoveToken(accessToken)
 	if err != nil {
 		return false
 	} else {
@@ -45,7 +48,7 @@ func (auth *AuthService) AuthorizeByToken(w http.ResponseWriter, accessToken *ty
 		json.NewEncoder(w).Encode(response)
 		return false
 	} 
-	err := auth.DbService.GetAuthToken(accessToken) 
+	err := auth.dbsrv.GetAuthToken(accessToken) 
 	if err != nil {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
@@ -54,7 +57,7 @@ func (auth *AuthService) AuthorizeByToken(w http.ResponseWriter, accessToken *ty
 		return false
 	}
 
-	err = auth.DbService.GetUserByID(accessToken, &user)
+	err = auth.dbsrv.GetUserByID(accessToken, &user)
 	if err != nil {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
@@ -80,7 +83,7 @@ func (auth *AuthService) GenerateAccessToken(w http.ResponseWriter, accessTokenR
 
 	
 	// Insert
-	insertionErrors := auth.DbService.InsertToken(accessToken)
+	insertionErrors := auth.dbsrv.InsertToken(accessToken)
 
 	if insertionErrors != nil {
 		w.Header().Set("Content-Type", "application/json")
@@ -120,7 +123,7 @@ func (auth *AuthService) Validate(w http.ResponseWriter, r *http.Request,req *ty
 	applog.Infof("username and password provided")
 	if !govalidator.IsNull(req.Password) && !govalidator.IsNull(req.Username) {
 		applog.Infof("get username and password from database")
-		err := auth.DbService.GetUserByName(req.Username, &user)
+		err := auth.dbsrv.GetUserByName(req.Username, &user)
 		if err != nil {
 			applog.Errorf("Error while fetching user details %v", err)
 			errs.Add("password", "Username or Password is wrong")

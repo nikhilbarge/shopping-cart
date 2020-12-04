@@ -15,7 +15,8 @@ func AddItem(w http.ResponseWriter, r *http.Request) {
 	// authenticating user
 	accessToken := &types.AccessToken{}
 	accessToken.GetTokenFromRequest(r)
-	authService := &service.AuthService{}
+	as := service.AuthService{}
+	authService := as.NewAuthService() 
 	if !authService.AuthorizeByToken(w, accessToken) {
 		return
 	}
@@ -23,8 +24,9 @@ func AddItem(w http.ResponseWriter, r *http.Request) {
 	cartid := authService.GetUser().CartID
 	cart := &types.Cart{}
 	cart.ID = cartid
-	applog.Info("adding item to cart")
-	cartService:=service.CartService{}
+	applog.Info("adding item to cart") 
+	crt := service.CartService{}
+	cartService := crt.NewCartService()
 	if cartService.Validate(w, r, cart) && cartService.AddToCart(w, cart) { 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
@@ -37,7 +39,8 @@ func AddItem(w http.ResponseWriter, r *http.Request) {
 func ViewCart(w http.ResponseWriter, r *http.Request) {
 	accessToken := &types.AccessToken{}
 	accessToken.GetTokenFromRequest(r)
-	authService := &service.AuthService{}
+	as := service.AuthService{}
+	authService := as.NewAuthService() 
 	if !authService.AuthorizeByToken(w, accessToken) {
 		return
 	}
@@ -46,7 +49,8 @@ func ViewCart(w http.ResponseWriter, r *http.Request) {
 	cart := &types.Cart{}
 	cart.ID = cartid 
 	applog.Info("get all items from cart")
-	cartService:=service.CartService{}
+	crt := service.CartService{}
+	cartService := crt.NewCartService()
 	if cartService.ViewCart(w, cart) { 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
@@ -60,7 +64,8 @@ func ViewCart(w http.ResponseWriter, r *http.Request) {
 func RemoveItem(w http.ResponseWriter, r *http.Request) {
 	accessToken := &types.AccessToken{}
 	accessToken.GetTokenFromRequest(r)
-	authService := &service.AuthService{}
+	as := service.AuthService{}
+	authService := as.NewAuthService() 
 	if !authService.AuthorizeByToken(w, accessToken) {
 		return
 	}
@@ -68,7 +73,8 @@ func RemoveItem(w http.ResponseWriter, r *http.Request) {
 	cartid := authService.GetUser().CartID
 	cart := &types.Cart{}
     cart.ID = cartid 
-	cartService:=service.CartService{}
+	crt := service.CartService{}
+	cartService := crt.NewCartService()
 	if cartService.RemoveItem(w, cart, params["itemid"]) { 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
@@ -80,14 +86,16 @@ func RemoveItem(w http.ResponseWriter, r *http.Request) {
 func ClearCart(w http.ResponseWriter, r *http.Request) {
 	accessToken := &types.AccessToken{}
 	accessToken.GetTokenFromRequest(r)
-	authService := &service.AuthService{}
+	as := service.AuthService{}
+	authService := as.NewAuthService() 
 	if !authService.AuthorizeByToken(w, accessToken) {
 		return
 	}
 	cartid := authService.GetUser().CartID
 	cart := &types.Cart{}
     cart.ID = cartid 
-	cartService:=service.CartService{}
+	crt := service.CartService{}
+	cartService := crt.NewCartService()
 	if cartService.ClearCart(w,cart) { 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)

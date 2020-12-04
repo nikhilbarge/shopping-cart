@@ -12,7 +12,11 @@ import (
 )
 
 type InventoryService struct{
-	DbService database.DataService
+	dbsrv database.IDataService
+} 
+func (is *InventoryService) NewInventoryService() *InventoryService {
+	dbservice := database.NewDBService()
+	return &InventoryService{dbsrv: dbservice}
 }
 // AddToInventory : adding/updating Inventory
 func (inventory *InventoryService) AddToInventory(w http.ResponseWriter, r *http.Request, item *types.Item) bool {
@@ -30,7 +34,7 @@ func (inventory *InventoryService) AddToInventory(w http.ResponseWriter, r *http
 	} 
 
 	applog.Infof("processing request to add item %s to inventory", item.Name)
-	err := inventory.DbService.GetItemByName(item.Name,&oldItem)
+	err := inventory.dbsrv.GetItemByName(item.Name,&oldItem)
 	if err!=nil && err.Error()!="not found" {
 		errs.Add("database", "unable to fetch item details") 
 		applog.Errorf("failed to fetch item %s err %v", item.Name,err)
@@ -43,7 +47,7 @@ func (inventory *InventoryService) AddToInventory(w http.ResponseWriter, r *http
 	if oldItem.ID != "" {
 		applog.Debugf("item %s already exists in inventory, increase in quantity ",item.Name)
 		oldItem.Quantity += item.Quantity
-		err := inventory.DbService.UpdateItemByID(oldItem.ID,&oldItem)
+		err := inventory.dbsrv.UpdateItemByID(oldItem.ID,&oldItem)
 		if err != nil {
 			applog.Errorf("failed to update item %s err %v", item.Name,err)
 			w.Header().Set("Content-Type", "application/json")
@@ -54,7 +58,7 @@ func (inventory *InventoryService) AddToInventory(w http.ResponseWriter, r *http
 			return false
 		} 
 	} else {
-		err := inventory.DbService.InsertItem(item)
+		err := inventory.dbsrv.InsertItem(item)
 		if err != nil {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusInternalServerError)
@@ -64,7 +68,7 @@ func (inventory *InventoryService) AddToInventory(w http.ResponseWriter, r *http
 			return false
 		} 
 	}
-	err = inventory.DbService.GetItemByName(item.Name, item)  
+	err = inventory.dbsrv.GetItemByName(item.Name, item)  
 	if len(errs) > 0 {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
@@ -84,7 +88,7 @@ func (inventory *InventoryService) ViewInvetory(w http.ResponseWriter,items *typ
  
 	applog.Info("get all items in invetory")
 	 
-	itemList, err := inventory.DbService.GetAllItems()
+	itemList, err := inventory.dbsrv.GetAllItems()
 	if err != nil {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
@@ -103,7 +107,7 @@ func (inventory *InventoryService) RemoveItem(w http.ResponseWriter,item *types.
 	errs := url.Values{} 
 	applog.Infof("remove all items in inventory")
 	if id != "" && bson.IsObjectIdHex(id) {
-		err := inventory.DbService.RemoveItem(item.ID)
+		err := inventory.dbsrv.RemoveItem(item.ID)
 		if err != nil {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusInternalServerError)
@@ -115,7 +119,7 @@ func (inventory *InventoryService) RemoveItem(w http.ResponseWriter,item *types.
 		applog.Infof("removed all item %s from inventory",item.ID)
 		return true
 	} else if id == "" {
-		err := inventory.DbService.RemoveAllItem()
+		err := inventory.dbsrv.RemoveAllItem()
 		if err != nil {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusInternalServerError)

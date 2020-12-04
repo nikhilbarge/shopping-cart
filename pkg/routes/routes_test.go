@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"net/http"
 	"net/http/httptest"
+	"shopping-cart/pkg/controllers/user"
 	"testing"
 
 	"github.com/gorilla/mux"
@@ -27,6 +28,7 @@ func Test_Get_Info_Valid(t *testing.T) {
 	if err != nil {
 		t.Fatal("Failed to create 'GET /v1/info' request.")
 	}
+	
 	m.ServeHTTP(rec, req)
 	if rec.Code != http.StatusOK {
 		t.Fatal("Server error: Returned ", rec.Code, " expected: ", http.StatusOK)
@@ -36,11 +38,12 @@ func Test_Get_Info_Valid(t *testing.T) {
 func Test_Login_Valid(t *testing.T) {  
 	loginPayload := []byte(`{"username":"nik", "password":"nik"}`) 
 	req, err = http.NewRequest("POST", "/v1/login", bytes.NewBuffer(loginPayload))
-	if err != nil {
+	if err == nil {
 		t.Fatal("Failed to create 'POST /v1/login' request.")
 	}
-	m.ServeHTTP(rec, req)
-	if rec.Code != http.StatusOK {
+	handler := http.HandlerFunc(user.Login)
+	handler.ServeHTTP(rec, req)
+	if rec.Code == http.StatusOK {
 		t.Fatal("Server error: Returned ", rec.Code, " expected: ", http.StatusOK)
 	}
 }

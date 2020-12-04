@@ -12,10 +12,14 @@ import (
 )
 
 type CartService struct {
-	DbService database.DataService
+	dbsrv database.IDataService
+} 
+func (cs *CartService) NewCartService() *CartService {
+	dbservice := database.NewDBService()
+	return &CartService{dbsrv: dbservice}
 }
 // Validate : Validate Cart creation/Updation
-func (cartservice *CartService) Validate(w http.ResponseWriter, r *http.Request, cart *types.Cart) bool {
+func (cs *CartService) Validate(w http.ResponseWriter, r *http.Request, cart *types.Cart) bool {
 	applog.Info("validating add to cart request")
 	errs := url.Values{}
 	 
@@ -26,7 +30,7 @@ func (cartservice *CartService) Validate(w http.ResponseWriter, r *http.Request,
 	}
 	if  cart.ID != "" {
 		oldCart := types.Cart{}
-		err :=  cartservice.DbService.GetCartByID(cart.ID, &oldCart)
+		err :=  cs.dbsrv.GetCartByID(cart.ID, &oldCart)
 		if err != nil {
 			applog.Errorf("invalid cart selected %s", cart.ID)
 			errs.Add("id", "Invalid Document ID")
@@ -55,7 +59,7 @@ func (cartservice *CartService) Validate(w http.ResponseWriter, r *http.Request,
 	// get item from inventory
 	inventoryItem := types.Item{}
 	if reqItem.ID!=""{
-		err := cartservice.DbService.GetItemByID(reqItem.ID,&inventoryItem) 
+		err := cs.dbsrv.GetItemByID(reqItem.ID,&inventoryItem) 
 		if err != nil {
 			applog.Errorf("invalid item selected %s", reqItem.ID)
 			errs.Add("id", "Invalid item ID") 
@@ -68,7 +72,7 @@ func (cartservice *CartService) Validate(w http.ResponseWriter, r *http.Request,
 	}
 	
 	applog.Infof("processing request to add item %s to cart %s", inventoryItem.Name, cart.ID)
-	err := cartservice.DbService.GetCartByID(cart.ID, cart)
+	err := cs.dbsrv.GetCartByID(cart.ID, cart)
 	if err!=nil {
 		errs.Add("database", "unable to fetch cart details") 
 		applog.Errorf("invalid request for cart %s", cart.ID)
@@ -112,10 +116,10 @@ func (cartservice *CartService) Validate(w http.ResponseWriter, r *http.Request,
 }
 
 //AddToCart : Update Cart record
-func (cartservice *CartService) AddToCart(w http.ResponseWriter, cart *types.Cart) bool { 
+func (cs *CartService) AddToCart(w http.ResponseWriter, cart *types.Cart) bool { 
 
  	applog.Infof("updating cart %s with new items",cart.ID)
-	err := cartservice.DbService.UpdateCart(cart.ID,cart)
+	err := cs.dbsrv.UpdateCart(cart.ID,cart)
 	if err != nil {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)
@@ -129,10 +133,10 @@ func (cartservice *CartService) AddToCart(w http.ResponseWriter, cart *types.Car
 } 
 
 //ViewCart : Find Cart records
-func (cartservice *CartService) ViewCart(w http.ResponseWriter, cart *types.Cart) bool { 
+func (cs *CartService) ViewCart(w http.ResponseWriter, cart *types.Cart) bool { 
  
 	applog.Infof("get all items in cart %v", cart.ID)
-	err := cartservice.DbService.GetCartByID(cart.ID, cart)
+	err := cs.dbsrv.GetCartByID(cart.ID, cart)
 	if err != nil {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusBadRequest)
@@ -146,12 +150,12 @@ func (cartservice *CartService) ViewCart(w http.ResponseWriter, cart *types.Cart
 }
 
 // RemoveItem : Find Cart record
-func (cartservice *CartService) RemoveItem(w http.ResponseWriter,cart *types.Cart, id string) bool { 
+func (cs *CartService) RemoveItem(w http.ResponseWriter,cart *types.Cart, id string) bool { 
 	errs := url.Values{}
  
 	applog.Infof("remove items in cart %s",cart.ID)
 	if bson.IsObjectIdHex(id) {
-		err := cartservice.DbService.GetCartByID(cart.ID, cart)
+		err := cs.dbsrv.GetCartByID(cart.ID, cart)
 		idx:= -1; 
 		for i ,crtItm := range cart.Items {
 			if crtItm.Item.ID == bson.ObjectIdHex(id) {
@@ -161,7 +165,7 @@ func (cartservice *CartService) RemoveItem(w http.ResponseWriter,cart *types.Car
 		} 		
 		if idx != -1 {
 			cart.Items = append(cart.Items[:idx], cart.Items[idx+1:]...)
-			err = cartservice.DbService.UpdateCart(cart.ID,cart)
+			err = cs.dbsrv.UpdateCart(cart.ID,cart)
 			if err != nil {
 				w.Header().Set("Content-Type", "application/json")
 				w.WriteHeader(http.StatusInternalServerError)
@@ -182,11 +186,11 @@ func (cartservice *CartService) RemoveItem(w http.ResponseWriter,cart *types.Car
 }
  
 //ClearCart : remove all item from cart
-func (cartservice *CartService) ClearCart(w http.ResponseWriter, cart *types.Cart) bool { 
+func (cs *CartService) ClearCart(w http.ResponseWriter, cart *types.Cart) bool { 
 	applog.Infof("remove all items in cart %s",cart.ID)
-	err := cartservice.DbService.GetCartByID(cart.ID, cart)
+	err := cs.dbsrv.GetCartByID(cart.ID, cart)
 	cart.Items = []types.CartItem{}
-	err =  cartservice.DbService.UpdateCart(cart.ID, cart)
+	err =  cs.dbsrv.UpdateCart(cart.ID, cart)
 	if err != nil {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusInternalServerError)

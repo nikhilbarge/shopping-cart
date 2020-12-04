@@ -12,7 +12,8 @@ import (
 func RegisterUser(w http.ResponseWriter, r *http.Request) {
 	user := &types.User{}
 	applog.Info("Register new user")
-	userService := service.UserService{} 
+	us := service.UserService{}
+	userService := us.NewUserService()
 	if userService.Validate(w, r, user) && userService.RegisterUser(w, r, user){
 		applog.Debugf("User '%s' created successfully",user.ID)
 		w.Header().Set("Content-Type", "application/json")
@@ -27,7 +28,8 @@ func RegisterUser(w http.ResponseWriter, r *http.Request) {
 func Login(w http.ResponseWriter, r *http.Request) {
 	auth := &types.AccessTokenRequest{}
 	applog.Info("login in user")
-	authService:= service.AuthService{}
+	as := service.AuthService{}
+	authService := as.NewAuthService() 
 	if !authService.Validate(w, r, auth) {
 		applog.Debug("unable to allow login")
 		return
@@ -49,7 +51,8 @@ func LogOut(w http.ResponseWriter, r *http.Request) {
 	// authenticating user
 	accessToken := &types.AccessToken{}
 	accessToken.GetTokenFromRequest(r)
-	authService := &service.AuthService{}
+	as := service.AuthService{}
+	authService := as.NewAuthService() 
 	if !authService.AuthorizeByToken(w, accessToken) {
 		return
 	} 
