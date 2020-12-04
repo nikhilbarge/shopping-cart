@@ -5,7 +5,7 @@
 replicaCount: 1
 
 images:
-   shoppingcart: docker.io/nikhilbarge/shopping-cart:latest
+   shoppingcart: docker.io/nikhilbarge/shopping-cart:test
 
 logLevel: "debug"
 ingress:

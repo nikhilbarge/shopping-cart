@@ -14,7 +14,7 @@ func SetRoutes(router *mux.Router) *mux.Router {
 	
 	router.HandleFunc("/v1/register", user.RegisterUser).Methods("POST")
 	router.HandleFunc("/v1/login", user.Login).Methods("POST")
-	router.HandleFunc("/v1/logout", user.LogOut).Methods("GET")
+	router.HandleFunc("/v1/logout", user.LogOut).Methods("POST")
 
 	router.HandleFunc("/v1/inventory", inventory.ViewInventory).Methods("GET")
 	router.HandleFunc("/v1/inventory", inventory.AddItemToInventory).Methods("POST")
