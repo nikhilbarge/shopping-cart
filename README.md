@@ -7,7 +7,8 @@ shopping-cart is microservice includes following features
 3. Add / Update / Delete / View Cart 
 
 Endpoints 
-
+    All Api for Inventory, Cart, logout will required access_token to be passed in header or as query param (access_token)
+    
 	App Info :
 	"GET" "/v1/info", user.AppDetails" 
 	
@@ -38,7 +39,9 @@ Build:
 
 Deployment:
  user can use helm chart to deploy shopping-cart app on cluster.
- example: 
+ deploy example: 
     navigate to deploy/shopping-cart and use following command to deploy shopping-cart app
 	helm install shopingcart -n=cart ./ 
+ uninstall example:
+        helm delete shopingcart -n=cart
 			
