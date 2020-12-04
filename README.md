@@ -7,7 +7,6 @@ shopping-cart is microservice includes following features
 3. Add / Update / Delete / View Cart 
 
 Endpoints 
-    All Api for Inventory, Cart, logout will required access_token to be passed in header or as query param (access_token)
     
 	App Info :
 	"GET" "/v1/info", user.AppDetails" 
@@ -32,7 +31,9 @@ Endpoints
 	 "PATCH" "/v1/cart" 
 	 "DELETE" "/v1/cart" 
 	 "DELETE" "/v1/cart/{itemid}" 
-	 
+
+All Api for Inventory, Cart, logout will required access_token to be passed in header or as query param (access_token)
+
 Build:
  update repository details in ./Makefile and use following command to generate build and push image to docker repo
  command: make all
