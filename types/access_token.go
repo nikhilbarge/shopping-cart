@@ -1,7 +1,6 @@
 package types
 
 import (
-	"net/http"
 	time "time"
 
 	"gopkg.in/mgo.v2/bson"
@@ -29,16 +28,4 @@ type AccessToken struct {
 // 	user.Password = ""
 // 	return user
 // }
-
-// func (accessToken *AccessToken) SetUser(usr User)  {
-// 	user = usr 
-// }
-
-func (accessToken *AccessToken) GetTokenFromRequest(r *http.Request) {
-	keys, ok := r.URL.Query()["access_token"] 
-	if !ok || len(keys[0]) < 1 {
-		accessToken.Token = r.Header.Get("access_token")
-	} else {
-		accessToken.Token = keys[0]
-	}
-}
+ 

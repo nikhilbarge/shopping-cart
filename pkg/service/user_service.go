@@ -1,9 +1,7 @@
 package service
 
 import (
-	"encoding/json"
-	"net/http"
-	"net/url"
+	"errors"
 	"shopping-cart/pkg/database"
 	"shopping-cart/types"
 	"shopping-cart/utils/applog"
@@ -20,67 +18,33 @@ func (us *UserService) NewUserService() *UserService {
 	dbservice := database.NewDBService()
 	return &UserService{dbsrv: dbservice}
 }
-func (us *UserService) Validate(w http.ResponseWriter, r *http.Request,user *types.User) bool {
-	errs := url.Values{} 
-	applog.Info("validating user info")
-	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
-		applog.Errorf("invalid user info err %v", err)
-		errs.Add("detail", "Invalid data") 
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusBadRequest)
-		response := map[string]interface{}{"errors": errs, "status": 0}
-		json.NewEncoder(w).Encode(response)
-		return false
-	}
- 
-	if user.Name == "" {
-		errs.Add("name", "Name is not provided")
-		applog.Error("Invalid info, empty user's name")
-	}
-	if user.UserName == "" {
-		errs.Add("username", "Username is not provided")
-		applog.Error("Invalid info, empty user's username")
-	}
-	if user.Email == "" {
-		errs.Add("email", "E-mail is not provided")
-		applog.Error("Invalid info, empty user's email")
-	}
-	if user.Password == "" {
-		errs.Add("password", "Password is not provided")
-		applog.Error("Invalid info, empty user's password")
-	}
+func (us *UserService) Validate(user *types.User) error {
+	applog.Info("validating user info") 
 	usr := types.User{}
  	err := us.dbsrv.GetUserByEmail(user.Email, &usr) 
 	if err != nil && err.Error() !=  "not found" {
-		applog.Error("failed to fetch user details by email", err)
-		errs.Add("user", "unable to get user data")
+		applog.Error("failed to fetch user details by email", err) 
+		return err
 	} else if usr.ID != ""{
-		errs.Add("email", "user with this email is already exists")
+		applog.Error("user with this email is already exists") 
+		return errors.New("user with this email is already exists")
 	}
 	usr2 := types.User{}
 	err = us.dbsrv.GetUserByName(user.UserName, &usr2)  
 	if err != nil && err.Error() !=  "not found" {
-		applog.Error("failed to fetch user details by username", err)
-		errs.Add("user", "unable to get user data")
-	} else if usr2.ID != "" {
-		errs.Add("username", "username is already exists")
-	}
- 
-	if len(errs) > 0 {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusBadRequest)
-		response := map[string]interface{}{"errors": errs, "status": 0}
-		json.NewEncoder(w).Encode(response)
-		return false
-	}
+		applog.Error("failed to fetch user details by username", err) 
+		return err
+	} else if usr2.ID != "" { 
+		applog.Error("username is already exists") 
+		return errors.New("username is already exists")
+	} 
 	applog.Info("user data validated successfully")
-	return true
+	return nil
 }
 
 
-func (us *UserService) RegisterUser(w http.ResponseWriter, r *http.Request,user *types.User) bool {
-	// Insert
-
+func (us *UserService) RegisterUser(user *types.User) error {
+	// Insert 
 	applog.Info("registering user")
 	cart := &types.Cart{}
 	cart.ID = bson.NewObjectId()
@@ -90,27 +54,19 @@ func (us *UserService) RegisterUser(w http.ResponseWriter, r *http.Request,user 
 	cartErr := us.dbsrv.InsertCart(cart)
 	if cartErr != nil {
 		applog.Errorf("failed to create cart for user, err %v ", cartErr)
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusInternalServerError)
-		response := map[string]interface{}{"errors": cartErr.Error(), "status": 0}
-		json.NewEncoder(w).Encode(response)
-		return false
-
+		return cartErr    
 	}
 	user.ID = bson.NewObjectId()
 	user.CartID = cart.ID
 	salt, _ := bcrypt.Salt(10)
 	user.Password, _ = bcrypt.Hash(user.Password, salt)
 	applog.Info("create new user")
-	insertionErrors := us.dbsrv.InsertUser(user)
-	if insertionErrors != nil {
+	err := us.dbsrv.InsertUser(user)
+	if err != nil {
 		applog.Error("error occured while registration of new user")
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusInternalServerError)
-		response := map[string]interface{}{"errors": insertionErrors.Error(), "status": 0}
-		json.NewEncoder(w).Encode(response) 
-		return false
+		 
+		return err
 	}
 	applog.Info("user resgistered successfully")
-	return true
+	return nil
 }
