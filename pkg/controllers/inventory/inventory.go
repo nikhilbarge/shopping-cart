@@ -23,11 +23,12 @@ func AddItemToInventory(w http.ResponseWriter, r *http.Request) {
 	authService := as.NewAuthService()  
 	errs := url.Values{}
 	if authService.GetUser().UserName!= "admin" {
-		errs.Add("data", "User does not have access to update inventory") 
+		errs.Add("data", "Forbiden, user is not 'admin'") 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusForbidden)
 		response := map[string]interface{}{"errors": errs, "status": 0}
 		json.NewEncoder(w).Encode(response)
+		return
 	}
 	 
 	item := &types.Item{} 
@@ -51,6 +52,7 @@ func AddItemToInventory(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		response := map[string]interface{}{"errors": errs, "status": 0}
 		json.NewEncoder(w).Encode(response)
+		return
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)

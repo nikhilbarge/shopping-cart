@@ -9,7 +9,6 @@ type User struct {
 	Name      string        `bson:"name" json:"name"`
 	UserName  string        `bson:"username" json:"username"`
 	Email     string        `bson:"email" json:"email"`
-	Password  string        `bson:"password" json:"password,omitempty"`
-	CartID    bson.ObjectId  `bson:"cartid" json:"cartid"`
+	Password  string        `bson:"password" json:"password,omitempty"` 
 }
 

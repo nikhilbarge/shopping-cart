@@ -99,6 +99,13 @@ func (m *MockApiClient) RemoveAllItem() error  {
 }
 
 
+
+func (m *MockApiClient) DeleteCart(id bson.ObjectId) error  {
+	args := m.Called() 
+	err, _ := args.Get(0).(error)
+	return  err
+}
+
 func (m *MockApiClient) GetAllItems() ([]types.Item,error)  {
 	args := m.Called()
 	items, _ := args.Get(0).([]types.Item) 

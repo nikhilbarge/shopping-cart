@@ -21,8 +21,11 @@ type IDataService interface {
 	InsertUser(user *types.User) error
 	InsertCart(cart *types.Cart) error
 	GetCartByID(cartid bson.ObjectId, cart *types.Cart) error
+	GetAllCartsForUser(userid bson.ObjectId) ([]types.Cart, error)
+	GetCartByName(cartname string, cart *types.Cart) error
 	UpdateCart(cartid bson.ObjectId, cart *types.Cart) error
-	
+	DeleteCart(cartid bson.ObjectId) error
+
 	GetItemByID(itemid bson.ObjectId, item *types.Item) error
 	GetItemByName(itemname string, item *types.Item) error
  	GetAllItems() ([]types.Item,error)
@@ -30,6 +33,14 @@ type IDataService interface {
 	InsertItem(item *types.Item) error
 	RemoveItem(itemid bson.ObjectId) error
 	RemoveAllItem() error 
+
+	GetCategoriesByName(categoryname string, category *types.Categories) error
+	GetCategoriesByID(id bson.ObjectId, category *types.Categories) error
+ 	GetAllCategoriess() ([]types.Categories,error)
+	UpdateCategoriesByID(categoryid bson.ObjectId, category *types.Categories) error 
+	InsertCategories(category *types.Categories) error
+	RemoveCategories(categoryid bson.ObjectId) error
+	RemoveAllCategories() error 
 }
 type dataService struct {
 	IDataService
@@ -78,9 +89,25 @@ func (ds *dataService) GetCartByID(cartid bson.ObjectId, cart *types.Cart) error
 	return db.C("cart").Find(bson.M{"_id": cartid}).One(&cart)
 } 
 
+// GetAllCartsForUser : Get cart from database
+func (ds *dataService) GetAllCartsForUser(userid bson.ObjectId) ([]types.Cart, error) {
+	carts := []types.Cart{}
+	err := db.C("cart").Find(bson.M{"userid": userid}).All(&carts)
+	return carts, err
+} 
+
+// GetCartByName : Get cart from database by name
+func (ds *dataService) GetCartByName(name string, cart *types.Cart) error {
+	return db.C("cart").Find(bson.M{"name": name}).One(&cart)
+} 
 // UpdateCart : update cart
 func (ds *dataService) UpdateCart(cartid bson.ObjectId, cart *types.Cart) error {
 	return db.C("cart").Update(bson.M{"_id": cartid}, bson.M{"$set": cart})
+} 
+
+// RemoveItem :
+func (ds *dataService) DeleteCart(cartid bson.ObjectId) error {
+	return db.C("cart").Remove(bson.M{"_id": cartid})
 } 
 
 // GetItemByID : Get cart from database
@@ -118,5 +145,48 @@ func (ds *dataService) RemoveItem(itemid bson.ObjectId) error {
 // RemoveAllItem :
 func (ds *dataService) RemoveAllItem() error {
 	_, err:=  db.C("inventory").RemoveAll(nil)
+	return err
+} 
+
+
+
+
+
+
+// GetCategoriesByID : Get cart from database
+func (ds *dataService) GetCategoriesByID(categoryid bson.ObjectId, category *types.Categories) error {
+	return db.C("categories").Find(bson.M{"_id": categoryid}).One(&category)
+} 
+
+// GetCategoriesByName :
+func (ds *dataService) GetCategoriesByName(categoryname string, category *types.Categories) error {
+	return db.C("categories").Find(bson.M{"name": categoryname}).One(&category)
+} 
+
+// GetAllCategoriess :
+func (ds *dataService) GetAllCategoriess() ([]types.Categories,error) {
+	categorys := []types.Categories{}
+	err := db.C("categories").Find(nil).All(&categorys)
+	return categorys, err
+} 
+
+// UpdateCategoriesByID :
+func (ds *dataService) UpdateCategoriesByID(categoryid bson.ObjectId, category *types.Categories) error {
+	return db.C("categories").Update(bson.M{"_id": categoryid}, bson.M{"$set": category})
+} 
+
+// InsertCategories :
+func (ds *dataService) InsertCategories(category *types.Categories) error {
+	return db.C("categories").Insert(&category)
+} 
+
+// RemoveCategories :
+func (ds *dataService) RemoveCategories(categoryid bson.ObjectId) error {
+	return db.C("categories").Remove(bson.M{"_id": categoryid})
+} 
+
+// RemoveAllCategories :
+func (ds *dataService) RemoveAllCategories() error {
+	_, err:=  db.C("categories").RemoveAll(nil)
 	return err
 } 

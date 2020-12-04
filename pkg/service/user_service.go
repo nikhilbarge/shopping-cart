@@ -18,6 +18,7 @@ func (us *UserService) NewUserService() *UserService {
 	dbservice := database.NewDBService()
 	return &UserService{dbsrv: dbservice}
 }
+// Validate : validate user details
 func (us *UserService) Validate(user *types.User) error {
 	applog.Info("validating user info") 
 	usr := types.User{}
@@ -42,22 +43,10 @@ func (us *UserService) Validate(user *types.User) error {
 	return nil
 }
 
-
+// RegisterUser : create new user 
 func (us *UserService) RegisterUser(user *types.User) error {
-	// Insert 
-	applog.Info("registering user")
-	cart := &types.Cart{}
-	cart.ID = bson.NewObjectId()
-	cart.Items= []types.CartItem{}
-
-	applog.Info("create new cart for user")
-	cartErr := us.dbsrv.InsertCart(cart)
-	if cartErr != nil {
-		applog.Errorf("failed to create cart for user, err %v ", cartErr)
-		return cartErr    
-	}
+	applog.Info("registering user") 
 	user.ID = bson.NewObjectId()
-	user.CartID = cart.ID
 	salt, _ := bcrypt.Salt(10)
 	user.Password, _ = bcrypt.Hash(user.Password, salt)
 	applog.Info("create new user")

@@ -89,14 +89,12 @@ func (suite *ServiceTestSuite) Test_ViewCart_Success() {
 	
 	suite.clientMock.On("GetCartByID").Return(nil) 
 	service := CartService{dbsrv: suite.clientMock} 
-
-	cart := types.Cart{ID: "5fc966a74d278b000141901f"}
-	 
+  
 	// Act 
-	response := service.ViewCart(&cart)
+	_, err := service.ViewAllCarts("5fc966a74d278b000141901d")
 
 	// Assert
-	assert.Nil(suite.T(), response, "Response should be nil")
+	assert.Nil(suite.T(), err, "Error should be nil")
 }
 
 func (suite *ServiceTestSuite) Test_RemoveItem_Success() { 
@@ -118,13 +116,11 @@ func (suite *ServiceTestSuite) Test_RemoveItem_Success() {
 func (suite *ServiceTestSuite) Test_ClearCart_Success() { 
 	
 	suite.clientMock.On("GetCartByID").Return(nil) 
-	suite.clientMock.On("UpdateCart").Return(nil) 
+	suite.clientMock.On("DeleteCart").Return(nil) 
 	service := CartService{dbsrv: suite.clientMock} 
 
-	cart := types.Cart{ID: "5fc966a74d278b000141901f"}
-	 
 	// Act 
-	response := service.ClearCart(&cart)
+	response := service.DeleteCart("5fc966a74d278b000141901f")
 
 	// Assert
 	assert.Nil(suite.T(), response, "Response should be nil")
