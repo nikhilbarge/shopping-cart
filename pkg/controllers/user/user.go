@@ -107,6 +107,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusInternalServerError)
 		response := map[string]interface{}{"errors": err.Error(), "status": 0}
 		json.NewEncoder(w).Encode(response)
+		return
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)

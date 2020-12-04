@@ -1,0 +1,17 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: shopping-cart
+  labels:
+    name: shopping-cart
+spec:
+  ports:
+  - nodePort: 30530
+    port: 8008
+    protocol: TCP
+    targetPort: 8008
+  selector:
+    app: shopping-cart
+  sessionAffinity: None
+  type: NodePort
