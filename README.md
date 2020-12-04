@@ -35,14 +35,16 @@ Endpoints
 All Api for Inventory, Cart, logout will required access_token to be passed in header or as query param (access_token)
 
 Build:
- update repository details in ./Makefile and use following command to generate build and push image to docker repo
- command: make all
+
+	update repository details in ./Makefile and use following command to generate build and push image to docker repo
+ 	command: make all
 
 Deployment:
- user can use helm chart to deploy shopping-cart app on cluster.
- deploy example: 
-    navigate to deploy/shopping-cart and use following command to deploy shopping-cart app
-	helm install shopingcart -n=cart ./ 
- uninstall example:
-        helm delete shopingcart -n=cart
+
+	navigate to "shopping-cart/deploy/shopping-cart/" and use following command to deploy shopping-cart app
+
+	deploy example: 
+ 		helm install shopingcart -n=cart ./ 
+ 	uninstall example:
+        	helm delete shopingcart -n=cart
 			
