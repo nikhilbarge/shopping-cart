@@ -25,10 +25,10 @@ Navigate to "shopping-cart/deploy/shopping-cart/" and use following command to d
  	uninstall example:
         	helm delete shopingcart -n=cart
 
-# Test 
+## Test 
 
 For unit testing it uses [testify](https://github.com/stretchr/testify) library.
 
-# API Guide
+## API Guide
 
 Please refer [Api Test Guide](API_Guide.md) includes all api call's with examples.
