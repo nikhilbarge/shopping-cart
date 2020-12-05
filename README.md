@@ -1,50 +1,34 @@
-Project: Shopping-Cart
+# Shopping-Cart: Microservice Demo Application
 
-Description 
-shopping-cart is microservice includes following features
-1. User Registration and Authentication
-2. Add / Update / Delete inventory (enabled for admin only)
-3. Add / Update / Delete / View Cart 
+## Description:
 
-Endpoints 
-    
-	App Info :
-	"GET" "/v1/info", user.AppDetails" 
-	
-	RegisterUser: 
-	"POST" "/v1/register", user.RegisterUser).Methods("POST")
-			
-	Login:
-	"POST" "/v1/login" 
-	
-	Logout:
-	"POST" "/v1/logout" 
-	
-	Inventory: [admin only]
-	 "GET" "/v1/inventory" 
-	 "POST" "/v1/inventory" 
-	 "DELETE" "/v1/inventory" 
-	 "DELETE" "/v1/inventory{itemid} 
-	
-	Cart:
-	 "GET" "/v1/cart"
-	 "PATCH" "/v1/cart" 
-	 "DELETE" "/v1/cart" 
-	 "DELETE" "/v1/cart/{itemid}" 
+shopping-cart offers REST api's to create category wise shopping list(s). 
+user (admin) can define categories for the list, and can define items which can be included in user list.  
+user can create create personalized shopping-list by selecting categories which are pre-defined and can add items to his lists.
+user can view, modify or delete items added in list.
 
-All Api for Inventory, Cart, logout will required access_token to be passed in header or as query param (access_token)
+It is built using Go and packaged in Docker containers.
+It can be deployed easily using helm chart included.
 
-Build:
+## Build:
 
-	update repository details in ./Makefile and use following command to generate build and push image to docker repo
- 	command: make all
+update repository details in ./Makefile and use following command to generate build and push image to docker repo
+ 	
+	command: make all
 
-Deployment:
+## Deployment:
 
-	navigate to "shopping-cart/deploy/shopping-cart/" and use following command to deploy shopping-cart app
+Navigate to "shopping-cart/deploy/shopping-cart/" and use following command to deploy shopping-cart app
 
 	deploy example: 
  		helm install shopingcart -n=cart ./ 
  	uninstall example:
         	helm delete shopingcart -n=cart
-			
+
+# Test 
+
+For unit testing it uses [testify](https://github.com/stretchr/testify) library.
+
+# API Guide
+
+Please refer [Api Test Guide](API_Guide.md) includes all api call's with examples.
