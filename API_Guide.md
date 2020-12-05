@@ -1,4 +1,6 @@
-Testing Api's
+# Shopping List Api Guide
+
+following are exmaples of call's with curl
 
 AppInfo:
 
